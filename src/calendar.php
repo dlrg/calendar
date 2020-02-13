@@ -15,7 +15,8 @@ $calendars = array(
 	'ljv' => 'uieyex'
 );
 
-$calendarKey = 'gremien';
+$calendarKey = $_GET['calendar'];
+if (empty($calendarKey)) $calendarKey = 'gremien';
 
 $selectedCalendarID = $calendars[$calendarKey];
 
@@ -27,6 +28,11 @@ echo <<<EOD
 	</head>
 	<body>
 EOD;
+
+if ($selectedCalendarID == NULL) {
+	echo "<h1>Calendar not found ¯\_(ツ)_/¯</h1>";
+	return;
+}
 
 try {
 	$parser = new CalDAVParser(function($base_url, $user, $pass) { return new CalDAVClient($base_url, $user, $pass); });
@@ -44,7 +50,7 @@ EOD;
 			'SUMMARY' => $e->summary(),
 			'DTSTART' => $e->startTime(),
 			'DTEND'   => $e->endTime(),
-			'LOCATION'=> 'TODO' //$e->location()
+			'LOCATION'=> $e->location()
 		];
 		$row = '<tr><td>' . TOK . 'SUMMARY' . TOK . '</td><td>' . TOK . 'LOCATION' . TOK . '</td><td>' . TOK . 'DTSTART' . TOK . '</td><td>' . TOK . 'DTEND' . TOK . '</td></tr>';
 		foreach ($mapping as $key => $value) {
