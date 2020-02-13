@@ -29,12 +29,12 @@ echo <<<EOD
 EOD;
 
 try {
-	$parser = new CalDAVParser(new SimpleCalDAVClient());
+	$parser = new CalDAVParser(function($base_url, $user, $pass) { return new CalDAVClient($base_url, $user, $pass); });
 	$parser->connect(ENDPOINT, USERNAME, PASSWORD);
 
 	echo <<<EOD
 <table>
-	<th><td>Name</td>
+	<th><td>Name</td><td>Ort</td>
 	<td>Beginn</td><td>Ende</td>
 </th>
 EOD;
@@ -43,9 +43,10 @@ EOD;
 		$mapping = [
 			'SUMMARY' => $e->summary(),
 			'DTSTART' => $e->startTime(),
-			'DTEND'   => $e->endTime()
+			'DTEND'   => $e->endTime(),
+			'LOCATION'=> 'TODO' //$e->location()
 		];
-		$row = '<tr><td>' . TOK . 'SUMMARY' . TOK . '</td><td>' . TOK . 'DTSTART' . TOK . '</td><td>' . TOK . 'DTEND' . TOK . '</td></tr>';
+		$row = '<tr><td>' . TOK . 'SUMMARY' . TOK . '</td><td>' . TOK . 'LOCATION' . TOK . '</td><td>' . TOK . 'DTSTART' . TOK . '</td><td>' . TOK . 'DTEND' . TOK . '</td></tr>';
 		foreach ($mapping as $key => $value) {
 			$row = str_replace(TOK . $key . TOK, $value, $row);
 		}

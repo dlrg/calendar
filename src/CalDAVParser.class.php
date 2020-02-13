@@ -4,7 +4,7 @@
 use ICal\ICal;
 
 require_once '../vendor/autoload.php';
-require_once '../vendor/simpleCalDAV/SimpleCalDAVClient.php';
+require_once 'caldav-client-v2.php';
 
 
 interface ICalDAVParserEvent {
@@ -58,29 +58,25 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 }
 
 class CalDAVParser implements ICalDAVParser {
-	private /** SimpleCalDAVClient **/ $client;
-	private /** [CalDAVCalendar] **/ $calendars;
+	private /** (string, string, string) -> Client **/ $clientFactory;
+	private /** CalDAVClient **/ $client;
+	private /** string **/ $user;
 
-	public function __construct(/** SimpleCalDAVClient */$client) {
-		$this->client = $client;
+	public function __construct(/** (string, string, string) -> Client **/$clientFactory) {
+		$this->clientFactory = $clientFactory;
 	}
 
 	public function connect($endpoint, $user, $pass) {
-		$this->client->connect($endpoint, $user, $pass);
-		$this->calendars = $this->client->findCalendars();
+		$this->user = $user;
+		$this->client = ($this->clientFactory)($endpoint, $user, $pass);
 	}
 
 	public function events($calendarID) {
-		if (!$this->calendars) {
-			throw new InvalidArgumentException('Calendars is undefined');
+		if ($this->client == NULL || $this->user == NULL) {
+			throw new InvalidArgumentException('Must call connect() first');
 		}
-
-		$calendar = $this->calendars[$calendarID];
-		if ($calendar == NULL) {
-			throw new InvalidArgumentException('No such calendar: '. $calendarID);
-		}
-
-		$this->client->setCalendar($calendar);
-		return array_map(function($e) { return new CalDAVParserEvent($e->getData()); }, $this->client->getEvents());
+		$url = '/caldav/' . $this->user . '/' . $calendarID;
+		$events = $this->client->GetEvents(null, null, $url);
+		return array_map(function($e) { return new CalDAVParserEvent($e['data']); }, $events);
 	}
 }
