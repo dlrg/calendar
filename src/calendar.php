@@ -20,7 +20,7 @@ $calendarKey = 'gremien';
 $selectedCalendarID = $calendars[$calendarKey];
 
 echo <<<EOD
-<DOCTYPE html>
+<!DOCTYPE html>
 <html>
 	<head>
 		<title></title>
@@ -34,9 +34,9 @@ try {
 
 	echo <<<EOD
 <table>
-	<th><td>Name</td><td>Ort</td>
-	<td>Beginn</td><td>Ende</td>
-</th>
+	<tr><th>Name</th><th>Ort</th>
+	<th>Beginn</th><th>Ende</th>
+</tr>
 EOD;
 
 	foreach ($parser->events($selectedCalendarID) as $e) {
