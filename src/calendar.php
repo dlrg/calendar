@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 require_once 'config.inc.php';
 require_once 'CalDAVParser.class.php';
 
-const TOK = '__%%__';
+require_once 'HTMLRenderer.class.php';
 
 const TARGET_TIMEZONE = 'Europe/Berlin';
 $calendars = array(
@@ -15,54 +15,29 @@ $calendars = array(
 	'ljv' => 'uieyex'
 );
 
-$calendarKey = $_GET['calendar'];
+if ($_GET) {
+	$calendarKey = $_GET['calendar'];
+} else {
+	$calendarKey = 'gremien';
+}
 if (empty($calendarKey)) $calendarKey = 'gremien';
 
 $selectedCalendarID = $calendars[$calendarKey];
 
-echo <<<EOD
-<!DOCTYPE html>
-<html>
-	<head>
-		<title></title>
-	</head>
-	<body>
-EOD;
+$renderer = new HTMLRenderer();
 
 if ($selectedCalendarID == NULL) {
-	echo "<h1>Calendar not found ¯\_(ツ)_/¯</h1>";
-	return;
-}
-
-try {
-	$parser = new CalDAVParser(function($base_url, $user, $pass) { return new CalDAVClient($base_url, $user, $pass); });
-	$parser->connect(ENDPOINT, USERNAME, PASSWORD);
-
-	echo <<<EOD
-<table>
-	<tr><th>Name</th><th>Ort</th>
-	<th>Beginn</th><th>Ende</th>
-</tr>
-EOD;
-
-	foreach ($parser->events($selectedCalendarID) as $e) {
-		$mapping = [
-			'SUMMARY' => $e->summary(),
-			'DTSTART' => $e->startTime(),
-			'DTEND'   => $e->endTime(),
-			'LOCATION'=> $e->location()
-		];
-		$row = '<tr><td>' . TOK . 'SUMMARY' . TOK . '</td><td>' . TOK . 'LOCATION' . TOK . '</td><td>' . TOK . 'DTSTART' . TOK . '</td><td>' . TOK . 'DTEND' . TOK . '</td></tr>';
-		foreach ($mapping as $key => $value) {
-			$row = str_replace(TOK . $key . TOK, $value, $row);
-		}
-		echo $row;
+	$renderer->setError('Calendar not found ¯\_(ツ)_/¯');
+} else {
+	try {
+		$parser = new CalDAVParser(function($base_url, $user, $pass) { return new CalDAVClient($base_url, $user, $pass); });
+		$parser->connect(ENDPOINT, USERNAME, PASSWORD);
+		$renderer->setEvents($parser->events($selectedCalendarID));
+	} catch (Exception $e) {
+		$renderer->setError('An error occured :\'(');
 	}
-	echo '</table>';
-} catch (Exception $e) {
-	echo '<h1>' . $e->__toString() . '</h1>';
 }
 
-echo '</body></html>';
+echo $renderer->render();
 
 ?>
