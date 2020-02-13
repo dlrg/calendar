@@ -1,0 +1,12 @@
+{
+	"name": "dlrgjugendsh/calendar",
+	"authors": [
+		{
+			"name": "Jeremy Boy",
+			"email": "jeremy.boy@sh.dlrg-jugend.de"
+		}
+	],
+	"require": {
+		"johngrogg/ics-parser": "^2"
+	}
+}
