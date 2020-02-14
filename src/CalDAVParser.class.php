@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
 
-use ICal\ICal;
-
-require_once '../vendor/autoload.php';
+require_once 'ICal/Event.php';
+require_once 'ICal/ICal.php';
 require_once 'caldav-client-v2.php';
 
+use ICal\ICal;
 
 interface ICalDAVParserEvent {
 	public function /** string **/ startTime();
