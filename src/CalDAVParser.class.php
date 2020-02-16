@@ -20,10 +20,12 @@ interface ICalDAVParser {
 }
 
 class CalDAVParserEvent implements ICalDAVParserEvent {
-	private /** string **/ $_startTime;
-	private /** string **/ $_endTime;
+	private /** DateTime **/ $_startTime;
+	private /** DateTime **/ $_endTime;
 	private /** string **/ $_summary;
 	private /** string **/ $_location;
+
+	const DATE_FMT = 'd.m.Y H:i';
 
 	public function __construct(/** string **/ $text) {
 		$ics = new ICal();
@@ -38,11 +40,11 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 	}
 
 	public function startTime() {
-		return $this->_startTime;
+		return $this->_startTime->format(CalDAVParserEvent::DATE_FMT);
 	}
 
 	public function endTime() {
-		return $this->_endTime;
+		return $this->_endTime->format(CalDAVParserEvent::DATE_FMT);
 	}
 
 	public function summary() {
@@ -60,7 +62,17 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 		}
 		$d = new DateTime($dtarray[1], new DateTimeZone($tz));
 		$d->setTimezone(new DateTimeZone(TARGET_TIMEZONE));
-		return $d->format('d.m.Y H:i');
+		return $d;
+	}
+
+	public static function compare($a, $b) {
+		if ($a->_startTime < $b->_startTime) {
+			return -1;
+		} else if ($a->_startTime > $b->_startTime) {
+			return 1;
+		} else {
+			return $a->_endTime < $b->_endTime;
+		}
 	}
 }
 
