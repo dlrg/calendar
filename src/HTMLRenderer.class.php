@@ -28,11 +28,18 @@ class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 	}
 
 	function render() {
-		$out = '<!DOCTYPE html><html><head><title></title></head><body>';
+		$css_files = array(
+			'https://sh.dlrg.de/typo3temp/assets/css/e35cdd6a3b.css',
+			'https://tv.dlrg.de/global/layout/2014/css/screen.css',
+			'style.css',
+		);
+		$out = '<!DOCTYPE html><html><head>';
+		$out .= array_reduce($css_files, function($acc, $href) { return $acc . "<link rel='stylesheet' type='text/css' href='$href'>"; }, '');
+		$out .= '</head><body>';
 
 		if ($this->error) {
 		}
-		$out .= '<table><tr><th>Name</th><th>Ort</th><th>Beginn</th><th>Ende</th></tr>';
+		$out .= '<table class="ce-table stacktable"><tr><th>Name</th><th>Ort</th><th>Beginn</th><th>Ende</th></tr>';
 		foreach ($this->events as $e) {
 			$mapping = [
 				'SUMMARY' => $e->summary(),
