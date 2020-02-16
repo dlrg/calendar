@@ -8,11 +8,12 @@ interface ErrorTemplate{
 }
 
 interface CalDAVEventTemplate {
-	function setEvents(/** ICalDAVEvent[] **/ $events);
+	function setEvents(/** string **/ $name, /** ICalDAVEvent[] **/ $events);
 }
 
 class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 	private /** string **/ $error;
+	private /** string **/ $name;
 	private /** ICalDAVEvent[] **/ $events;
 
 	const TOK = '__%%__';
@@ -22,8 +23,9 @@ class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 		$this->events = NULL;
 	}
 
-	function setEvents(/** ICalDAVEvent[] **/ $events) {
+	function setEvents(/** string **/ $name, /** ICalDAVEvent[] **/ $events) {
 		$this->error = NULL;
+		$this->name = $name;
 		$this->events = $events;
 	}
 
@@ -55,7 +57,9 @@ class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 		}
 		$out .= '</table>';
 		$out .= '</body></html>';
-		return $out;
+		header('Content-Security-Policy: frame-ancestors *.dlrg.de');
+
+		echo $out;
 	}
 
 }

@@ -12,6 +12,7 @@ interface ICalDAVParserEvent {
 	public function /** string **/ endTime();
 	public function /** string **/ summary();
 	public function /** string **/ location();
+	public function /** string **/ vevent();
 }
 
 interface ICalDAVParser {
@@ -24,6 +25,7 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 	private /** DateTime **/ $_endTime;
 	private /** string **/ $_summary;
 	private /** string **/ $_location;
+	private /** string **/ $_vevent;
 
 	const DATE_FMT = 'd.m.Y H:i';
 
@@ -37,6 +39,7 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 		$this->_endTime = CalDAVParserEvent::convertDate($event->dtend_array);
 		$this->_summary = $event->summary;
 		$this->_location = $event->location;
+		$this->_vevent = $text . "\n";
 	}
 
 	public function startTime() {
@@ -53,6 +56,10 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 
 	public function location() {
 		return $this->_location;
+	}
+
+	public function vevent() {
+		return $this->_vevent;
 	}
 
 	private static function convertDate($dtarray) {
