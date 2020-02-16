@@ -32,7 +32,9 @@ if ($selectedCalendarID == NULL) {
 	try {
 		$parser = new CalDAVParser(function($base_url, $user, $pass) { return new CalDAVClient($base_url, $user, $pass); });
 		$parser->connect(ENDPOINT, USERNAME, PASSWORD);
-		$renderer->setEvents($parser->events($selectedCalendarID));
+		$events = $parser->events($selectedCalendarID);
+		usort($events, array("CalDAVParserEvent", "compare"));
+		$renderer->setEvents($events);
 	} catch (Exception $e) {
 		$renderer->setError('An error occured :\'(');
 	}
