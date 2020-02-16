@@ -40,6 +40,8 @@ if ($selectedCalendarID == NULL) {
 	}
 }
 
+header('Content-Security-Policy: frame-ancestors *.dlrg.de');
+
 echo $renderer->render();
 
 ?>
