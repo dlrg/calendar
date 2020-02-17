@@ -15,8 +15,8 @@ $calendars = array(
 );
 
 if ($_GET) {
-	$calendarKey = array_key_exists('calendar', $_GET) ? $_GET['calendar'] : '';
-	$download = array_key_exists('download', $_GET) && $_GET['download'] == 1;
+	$calendarKey = array_get_safe('calendar', $_GET, '');
+	$download = array_get_safe('download', $_GET, 0) == 1;
 } else {
 	$calendarKey = 'gremien';
 	$download = false;
