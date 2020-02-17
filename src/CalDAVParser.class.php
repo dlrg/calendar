@@ -77,7 +77,8 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 	}
 
 	private static function convertDate($dtarray) {
-		$tz = $dtarray[0]['TZID'];
+		$dt = $dtarray[0];
+		$tz = array_key_exists('TZID', $dt) ? $dt['TZID'] : '';
 		if (empty($tz)) {
 			$tz = TARGET_TIMEZONE;
 		}
