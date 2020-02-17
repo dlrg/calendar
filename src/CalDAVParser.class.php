@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-
 require_once 'ICal/Event.php';
 require_once 'ICal/ICal.php';
+
 require_once 'caldav-client-v2.php';
 
 use ICal\ICal;
@@ -12,6 +12,7 @@ interface ICalDAVParserEvent {
 	public function /** string **/ endTime();
 	public function /** string **/ summary();
 	public function /** string **/ location();
+	public function /** string **/ vevent();
 }
 
 interface ICalDAVParser {
@@ -20,10 +21,13 @@ interface ICalDAVParser {
 }
 
 class CalDAVParserEvent implements ICalDAVParserEvent {
-	private /** string **/ $_startTime;
-	private /** string **/ $_endTime;
+	private /** DateTime **/ $_startTime;
+	private /** DateTime **/ $_endTime;
 	private /** string **/ $_summary;
 	private /** string **/ $_location;
+	private /** string **/ $_vevent;
+
+	const DATE_FMT = 'd.m.Y H:i';
 
 	public function __construct(/** string **/ $text) {
 		$ics = new ICal();
@@ -35,14 +39,22 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 		$this->_endTime = CalDAVParserEvent::convertDate($event->dtend_array);
 		$this->_summary = $event->summary;
 		$this->_location = $event->location;
+		$lines = explode("\n", $text);
+		while ($lines[0] != 'BEGIN:VEVENT') {
+			array_shift($lines);
+		}
+		if (end($lines) == 'END:VCALENDAR') {
+			array_pop($lines);
+		}
+		$this->_vevent = implode("\n", $lines);
 	}
 
 	public function startTime() {
-		return $this->_startTime;
+		return $this->_startTime->format(CalDAVParserEvent::DATE_FMT);
 	}
 
 	public function endTime() {
-		return $this->_endTime;
+		return $this->_endTime->format(CalDAVParserEvent::DATE_FMT);
 	}
 
 	public function summary() {
@@ -53,6 +65,10 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 		return $this->_location;
 	}
 
+	public function vevent() {
+		return $this->_vevent;
+	}
+
 	private static function convertDate($dtarray) {
 		$tz = $dtarray[0]['TZID'];
 		if (empty($tz)) {
@@ -60,7 +76,17 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 		}
 		$d = new DateTime($dtarray[1], new DateTimeZone($tz));
 		$d->setTimezone(new DateTimeZone(TARGET_TIMEZONE));
-		return $d->format('d.m.Y H:i');
+		return $d;
+	}
+
+	public static function compare($a, $b) {
+		if ($a->_startTime < $b->_startTime) {
+			return -1;
+		} else if ($a->_startTime > $b->_startTime) {
+			return 1;
+		} else {
+			return $a->_endTime < $b->_endTime;
+		}
 	}
 }
 

@@ -1,13 +1,10 @@
 <?php declare(strict_types=1);
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
 require_once 'config.inc.php';
 require_once 'CalDAVParser.class.php';
 
 require_once 'HTMLRenderer.class.php';
+require_once 'ICSRenderer.class.php';
 
 const TARGET_TIMEZONE = 'Europe/Berlin';
 $calendars = array(
@@ -18,15 +15,21 @@ $calendars = array(
 );
 
 if ($_GET) {
-	$calendarKey = $_GET['calendar'];
+	$calendarKey = array_key_exists('calendar', $_GET) ? $_GET['calendar'] : '';
+	$download = array_key_exists('download', $_GET) && $_GET['download'] == 1;
 } else {
 	$calendarKey = 'gremien';
+	$download = false;
 }
 if (empty($calendarKey)) $calendarKey = 'gremien';
 
 $selectedCalendarID = $calendars[$calendarKey];
 
-$renderer = new HTMLRenderer();
+if ($download) {
+	$renderer = new ICSRenderer();
+} else {
+	$renderer = new HTMLRenderer();
+}
 
 if ($selectedCalendarID == NULL) {
 	$renderer->setError('Calendar not found ¯\_(ツ)_/¯');
@@ -34,12 +37,14 @@ if ($selectedCalendarID == NULL) {
 	try {
 		$parser = new CalDAVParser(function($base_url, $user, $pass) { return new CalDAVClient($base_url, $user, $pass); });
 		$parser->connect(ENDPOINT, USERNAME, PASSWORD);
-		$renderer->setEvents($parser->events($selectedCalendarID));
+		$events = $parser->events($selectedCalendarID);
+		usort($events, array("CalDAVParserEvent", "compare"));
+		$renderer->setEvents($calendarKey, $events);
 	} catch (Exception $e) {
 		$renderer->setError('An error occured :\'(');
 	}
 }
 
-echo $renderer->render();
+$renderer->render();
 
 ?>

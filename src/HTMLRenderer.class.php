@@ -8,11 +8,12 @@ interface ErrorTemplate{
 }
 
 interface CalDAVEventTemplate {
-	function setEvents(/** ICalDAVEvent[] **/ $events);
+	function setEvents(/** string **/ $name, /** ICalDAVEvent[] **/ $events);
 }
 
 class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 	private /** string **/ $error;
+	private /** string **/ $name;
 	private /** ICalDAVEvent[] **/ $events;
 
 	const TOK = '__%%__';
@@ -22,17 +23,25 @@ class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 		$this->events = NULL;
 	}
 
-	function setEvents(/** ICalDAVEvent[] **/ $events) {
+	function setEvents(/** string **/ $name, /** ICalDAVEvent[] **/ $events) {
 		$this->error = NULL;
+		$this->name = $name;
 		$this->events = $events;
 	}
 
 	function render() {
-		$out = '<!DOCTYPE html><html><head><title></title></head><body>';
+		$css_files = array(
+			'https://sh.dlrg.de/typo3temp/assets/css/e35cdd6a3b.css',
+			'https://tv.dlrg.de/global/layout/2014/css/screen.css',
+			'style.css',
+		);
+		$out = '<!DOCTYPE html><html><head>';
+		$out .= array_reduce($css_files, function($acc, $href) { return $acc . "<link rel='stylesheet' type='text/css' href='$href'>"; }, '');
+		$out .= '</head><body>';
 
 		if ($this->error) {
 		}
-		$out .= '<table><tr><th>Name</th><th>Ort</th><th>Beginn</th><th>Ende</th></tr>';
+		$out .= '<table class="ce-table stacktable"><tr><th>Name</th><th>Ort</th><th>Beginn</th><th>Ende</th></tr>';
 		foreach ($this->events as $e) {
 			$mapping = [
 				'SUMMARY' => $e->summary(),
@@ -47,8 +56,11 @@ class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 			$out .= $row;
 		}
 		$out .= '</table>';
+		$out .= '<p style="text-align: right;"><a href="' . $_SERVER['REQUEST_URI'] . '&download=1">Kalender abonnieren</a></p>';
 		$out .= '</body></html>';
-		return $out;
+		header('Content-Security-Policy: frame-ancestors *.dlrg.de');
+
+		echo $out;
 	}
 
 }
