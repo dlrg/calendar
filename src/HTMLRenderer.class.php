@@ -53,10 +53,15 @@ class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 			foreach ($mapping as $key => $value) {
 				$row = str_replace(HTMLRenderer::TOK . $key . HTMLRenderer::TOK, $value, $row);
 			}
+			if ($e->description()) {
+				$row .= '<tr><td colspan="4">' . $e->description() . '</td></tr>';
+			}
 			$out .= $row;
 		}
 		$out .= '</table>';
-		$out .= '<p style="text-align: right;"><a href="' . $_SERVER['REQUEST_URI'] . '&download=1">Kalender abonnieren</a></p>';
+		if ($_SERVER) {
+			$out .= '<p style="text-align: right;"><a href="' . $_SERVER['REQUEST_URI'] . '&download=1">Kalender abonnieren</a></p>';
+		}
 		$out .= '</body></html>';
 		header('Content-Security-Policy: frame-ancestors *.dlrg.de');
 
