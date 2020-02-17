@@ -1,6 +1,5 @@
 <?php declare(strict_types=1);
 
-
 use ICal\ICal;
 
 require_once '../vendor/autoload.php';
@@ -39,7 +38,14 @@ class CalDAVParserEvent implements ICalDAVParserEvent {
 		$this->_endTime = CalDAVParserEvent::convertDate($event->dtend_array);
 		$this->_summary = $event->summary;
 		$this->_location = $event->location;
-		$this->_vevent = $text . "\n";
+		$lines = explode("\n", $text);
+		while ($lines[0] != 'BEGIN:VEVENT') {
+			array_shift($lines);
+		}
+		if (end($lines) == 'END:VCALENDAR') {
+			array_pop($lines);
+		}
+		$this->_vevent = implode("\n", $lines);
 	}
 
 	public function startTime() {

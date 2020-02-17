@@ -19,10 +19,13 @@ class ICSRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 	function render() {
 		header('Content-Disposition: attachment; filename="' . $this->name . '.ics"');
 		header('Content-Type: text/calendar');
-		echo array_reduce($this->events, 
+		$out = "BEGIN:VCALENDAR\r\nPRODID:-//dlrg/calendar v1.0\r\nVERSION:2.0\r\n";
+		$out .= array_reduce($this->events,
 			function($acc, $e) { 
 				$line = preg_replace('~\R~u', "\r\n", $e->vevent());
-				return $acc . $line;
+				return $acc . $line . "\r\n";
 			}, '');
+		$out .= "END:VCALENDAR";
+		echo $out;
 	}
 }
