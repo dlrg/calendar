@@ -56,7 +56,7 @@ class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 			$out .= $row;
 		}
 		$out .= '</table>';
-		$out .= '<p style="text-align: right;"><a href="' . $_SERVER[REQUEST_URI] . '&download=1">Kalender abonnieren</a></p>';
+		$out .= '<p style="text-align: right;"><a href="' . $_SERVER['REQUEST_URI'] . '&download=1">Kalender abonnieren</a></p>';
 		$out .= '</body></html>';
 		header('Content-Security-Policy: frame-ancestors *.dlrg.de');
 
