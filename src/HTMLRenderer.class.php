@@ -1,4 +1,7 @@
 <?php
+
+require_once('utils.php');
+
 interface Renderer {
 	function render() /**: string **/;
 }
@@ -59,9 +62,9 @@ class HTMLRenderer implements CalDAVEventTemplate, ErrorTemplate, Renderer {
 			$out .= $row;
 		}
 		$out .= '</table>';
-		if ($_SERVER) {
-			$out .= '<p style="text-align: right;"><a href="' . $_SERVER['REQUEST_URI'] . '&download=1">Kalender abonnieren</a></p>';
-		}
+		$uri = array_get_safe('REQUEST_URI', $_SERVER, '');
+		$out .= '<p style="text-align: right;"><a href="' . $uri . '&download=1">Kalender abonnieren</a></p>';
+	
 		$out .= '</body></html>';
 		header('Content-Security-Policy: frame-ancestors *.dlrg.de');
 
